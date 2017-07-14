@@ -1,0 +1,166 @@
+<% include header %>
+
+
+            <div class="col-md-8 blog-main">
+                <div class="row content">
+
+                </div>
+
+                <div class="paging">
+                    <a href="javascript:;" class="older"><i>点击加载更多......</i></a>
+                </div>
+            </div>
+<!--分类start-->
+<aside class="col-md-4 blog-aside">
+
+    <div class="aside-widget">
+        <header>
+            <h3>精品推荐</h3>
+        </header>
+        <div class="body">
+            <ul class="clean-list topBlogs">
+                <%for(var i=0;i<blogs.length;i++){%>
+                <li><a href="/detail?id=<%=blogs[i]._id%>" target="_blank"><%=blogs[i].title%></a></li>
+                <%}%>
+            </ul>
+        </div>
+    </div>
+
+    <div class="aside-widget">
+        <header>
+            <h3>热门标签</h3>
+        </header>
+        <div class="body clearfix">
+            <ul class="tags">
+                <li><a class="blogType all">全部</a></li>
+                <%for(var i=0;i<blogTypes.length;i++){%>
+                <li><a class="blogType" data-id="<%=blogTypes[i]._id%>"><%=blogTypes[i].typeName%></a></li>
+                <%}%>
+            </ul>
+        </div>
+    </div>
+</aside>
+<!--分类end-->
+
+
+<% include footer %>
+<script>
+  $(function () {
+
+      $.ajaxSetup({
+              beforeSend: function () {
+                          layer.open({
+                              type: 2
+                              ,content: '加载中'
+                          });
+                      },
+              complete: function () {
+                      //ajax请求完成，不管成功失败
+                  setTimeout(function () {
+                      layer.closeAll();
+                  },500)
+
+                  },
+              error: function () {
+                  //ajax请求失败
+                   }
+             });
+
+      
+      var indexPage={
+          init:function () {
+              this.getData();
+              this.initEvent();
+          },
+          sContent:'',
+          queryData:{
+              page:1,
+              simple:true,
+          },
+          getData:function () {
+              var _this=this;
+              var sContent=this.sContent='';
+              var sendObj=this.queryData;
+              var page=sendObj.page;
+
+              $.post('api/blog/list',sendObj,function (data) {
+                  var data=JSON.parse(data);
+                  if(data.blogs.length>0){
+                      var blogs=data.blogs;
+                      $(blogs).each(function (index,item) {
+
+                          sContent+='<div class="col-md-12 col-sm-12">'
+                              +'<article class=" blog-teaser">'
+                              +'<header><h3><a href="/detail?id='+ item._id +'" target="_blank">'+ item.title +'</a></h3><span class="meta">'+ item.createTime +'</span><span class="meta readerNum">阅读数('+item.readerNum+')</span><hr></header>'
+                              +'<div class="body">' + item.introduction +'</div>'
+                              +'<div class="clearfix">' +'<a href="/detail?id='+ item._id +'" class="btn btn-clean-one" target="_blank">Read more</a>'
+                              +'</div>'
+                              +'</article>'
+                              +'</div>';
+
+                      });
+
+                      if(page==1){
+
+                          $('.content').html(sContent);
+                      }else{
+
+                          $('.content').append(sContent);
+                      }
+                      _this.queryData.page++;
+                  }else{
+                      if(page==1){
+                          $('.content').html('<div style="text-align: center;padding:10px 0;">暂无数据</div>');
+                      }else{
+                          $('.older').html('<i>暂无更多数据</i>');
+                      }
+                  }
+              });
+          },
+          initEvent:function () {
+              var _this=this;
+              $('.paging').on('click',function () {
+                  _this.getData();
+              });
+
+              $('.searchbutton').on('click',function () {
+                  _this.queryData.page=1;
+
+                  if($.trim($('.searchfield').val())){
+                      _this.queryData.name=$('.searchfield').val();
+                      _this.getData();
+                  }else{
+                      layer.open({
+                          content: '请输入查询关键字'
+                          ,skin: 'msg'
+                          ,time: 2 //2秒后自动关闭
+                      });
+
+                  }
+
+              });
+
+              $('.tags').on('click','.blogType',function () {
+                  $('.tags a').removeClass('tagsActive');
+                  $(this).addClass('tagsActive');
+                  var id=$(this).data('id');
+                  _this.queryData.page=1;
+                  if(id){
+                      _this.queryData.typeId=id;
+                      _this.getData();
+                  }else{
+                      delete _this.queryData.typeId;
+                      _this.getData();
+                  }
+
+              })
+          }
+      }
+
+      indexPage.init();
+
+  })
+
+
+</script>
+

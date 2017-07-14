@@ -1,0 +1,19 @@
+<% include header %>
+<article class="blog-post">
+
+  <div class="body">
+    <h1 style="text-align: center"><%=title%></h1>
+    <div class="meta">
+      <i class="fa fa-user"></i> <%=author%> <i class="fa fa-calendar"></i><%=createTime%>
+        <span class="fa readerNum">阅读数(<%=readerNum?readerNum:0%>)</span>
+
+     <!-- <i class="fa fa-comments"></i><span class="data"><a href="#comments">3 Comments</a></span>-->
+    </div>
+   <p>
+       <%-content%>
+   </p>
+
+  </div>
+</article>
+
+<% include footer %>
